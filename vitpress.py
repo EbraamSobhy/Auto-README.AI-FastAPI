@@ -5,6 +5,7 @@ import os
 import shutil
 import git
 import json
+import subprocess
 
 app = FastAPI()
 
@@ -81,7 +82,7 @@ export default defineConfig({{
 
 @app.post("/generate-vitepress")
 def generate_vitepress(data: RepoRequest):
-    temp_repo = "temp_repo_vite"
+    temp_repo = "repo-vitepress"
     
     # Cleanup previous runs
     if os.path.exists(temp_repo):
@@ -108,16 +109,18 @@ def generate_vitepress(data: RepoRequest):
         # Create VitePress Structure
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         setup_vitepress(repo_name, readme_content, OUTPUT_DIR)
+
+        subprocess.run(
+            "npm install && npm run docs:dev",
+            cwd=OUTPUT_DIR,
+            shell=True,
+            check=True
+        )
         
         return {
             "status": "success",
-            "message": "VitePress project generated successfully.",
+            "message": "VitePress documentation generated successfully.",
             "output_directory": os.path.abspath(OUTPUT_DIR),
-            "instructions": [
-                f"cd {OUTPUT_DIR}",
-                "npm install",
-                "npm run docs:dev"
-            ]
         }
         
     except Exception as e:
@@ -126,21 +129,3 @@ def generate_vitepress(data: RepoRequest):
         # Cleanup temp repo but keep output
         if os.path.exists(temp_repo):
             shutil.rmtree(temp_repo)
-
-"""
-1. Start the Server:
-   1     ./venv/bin/uvicorn vitpress:app --reload --port 8001
-
-   2. Generate Documentation (Example):
-      Open a new terminal and run:
-
-   1     curl -X POST http://localhost:8001/generate-vitepress \
-   2          -H "Content-Type: application/json" \
-   3          -d '{"repo_url": "https://github.com/fastapi/fastapi"}'
-
-   3. View the Documentation:
-      The API will create a vitepress_dist directory. To view the site:
-   1     cd vitepress_dist
-   2     npm install
-   3     npm run docs:dev
-"""
