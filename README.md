@@ -51,7 +51,7 @@ Send a POST request to `/generate-readme` with the repository URL.
 ```bash
 curl -X POST http://localhost:8000/generate-readme \
      -H "Content-Type: application/json" \
-     -d '{"repo_url": "https://github.com/fastapi/fastapi"}'
+     -d '{"repo_url": "https://github.com/username/repo"}'
 ```
 
 **Notes:**
