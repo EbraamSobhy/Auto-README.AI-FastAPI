@@ -21,13 +21,32 @@ app.add_middleware(
 )
 
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_BASE_URL = "http://localhost:11434"
+
+def ensure_model_exists(model_name: str):
+    try:
+        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags")
+        models = response.json().get("models", [])
+        if any(m["name"] == model_name or m["name"].split(":")[0] == model_name.split(":")[0] for m in models):
+            return
+        
+        print(f"Model {model_name} not found. Pulling...")
+        requests.post(
+            f"{OLLAMA_BASE_URL}/api/pull",
+            json={"name": model_name, "stream": False},
+            timeout=None
+        )
+    except Exception as e:
+        print(f"Error ensuring model exists: {e}")
 
 def generate_readme_with_ollama(prompt: str):
+    model_name = "llama3.1:8b"
+    ensure_model_exists(model_name)
+    
     response = requests.post(
-        OLLAMA_URL,
+        f"{OLLAMA_BASE_URL}/api/generate",
         json={
-            "model": "llama3.1:8b",
+            "model": model_name,
             "prompt": prompt,
             "stream": False
         }
@@ -124,3 +143,24 @@ Repository content:
 
 
 # ollama pull llama3.1:8b
+
+"""
+curl -X POST http://localhost:8000/generate-readme \
+         -H "Content-Type: application/json" \
+         -d '{"repo_url": "https://github.com/Ebraam-Sobhy/Apps-Platforms-City.git"}'
+"""
+
+"""
+  Test with curl
+  Open another terminal and run the following command (replace the URL with any public repository you want to test):
+
+    curl -X POST http://localhost:8000/generate-readme \
+         -H "Content-Type: application/json" \
+         -d '{"repo_url": "https://github.com/fastapi/fastapi"}'
+
+  Important Notes:
+   * Ollama Service: Ensure Ollama is running on your machine (it usually starts automatically after installation, or you can run ollama serve).
+   * First Run Delay: If you don't have the llama3.1:8b model yet, the first request will take several minutes because the backend will be downloading the ~4.7GB model. You can monitor the
+     progress in the terminal where the backend is running.
+   * Logs: Check the backend terminal; it will print Model llama3.1:8b not found. Pulling... if it's downloading the model.
+"""
