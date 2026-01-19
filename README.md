@@ -17,8 +17,8 @@ This backend project provides two main services:
 
 1.  **Clone the repository**:
     ```bash
-    git clone <your-repo-url>
-    cd Backend
+    git clone [<your-repo-url>](https://github.com/EbraamSobhy/Auto-README.AI-FastAPI.git)
+    cd Auto-README.AI-FastAPI
     ```
 
 2.  **Create and activate a virtual environment**:
