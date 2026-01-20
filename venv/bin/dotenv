@@ -1,4 +1,4 @@
-#!/home/pero/Coding/Auto-README/Backend/venv/bin/python3
+#!/home/pero/Coding/Auto-README/Auto-README.AI-FastAPI/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
